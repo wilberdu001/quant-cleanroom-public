@@ -1,26 +1,24 @@
-# Public showcase 1.0.0
+# Public showcase 1.1.0
 
-Repository: https://github.com/wilberdu001/quant-cleanroom-public
+[Repository](https://github.com/wilberdu001/quant-cleanroom-public) · [Live demo](https://wilberdu001.github.io/quant-cleanroom-public/)
 
-Demo: https://wilberdu001.github.io/quant-cleanroom-public/
+## English-first research presentation
 
-## Included
+- Reorganized the README around the live demo, quantitative data-cleaning decisions, reproducible setup, architecture, and test evidence.
+- Translated the complete public UI, Python comments/docstrings, audit labels, sample provenance, notebook explanations, script exports, boundary documentation, and screenshots into English.
+- Added a reproducible sample exporter and an English-only release check so generated files and future public changes follow the same policy.
+- Preserved the private complete project's language, code, data access, and Git history.
 
-- Shared Python/pandas OHLCV cleaning with detailed Chinese comments.
-- Synthetic, seeded contamination experiments and browser-local CSV input.
-- Record-level raw, intermediate, final and quarantine inspection.
-- Matplotlib price-quality and data-ready return-distribution figures.
-- Self-contained Jupyter Notebook, VS Code script and project ZIP downloads.
-- Public-release boundary checks, causal invariance tests and executable Notebook CI.
+## Numerical compatibility
 
-## Verified
+Compared with public release 1.0.0, every stage count, row ID, numeric value, anomaly score, and feature-readiness flag is unchanged for seed 72641. Human-readable quarantine reasons and anomaly labels are translated; cleaning rules are unchanged.
 
-The local Python research script, five unittest cases and complete Notebook execution passed. GitHub Actions research checks and GitHub Pages deployment passed. Browser verification at the public URL confirmed Python 3.13.2 / Pyodide 0.28.2 execution, one matplotlib SVG, the expected default sample counts, and an actual Notebook download.
+The reference experiment still produces 241 raw records, 17 quarantined records, 224 accepted records, 16 missing minutes, 4 flagged returns, and 16 data-ready observations. These are synthetic-data quality outcomes, not strategy returns.
 
-The default seed 72641 yields 241 raw records, 17 quarantined records, 16 missing minutes and 16 data-ready observations. These are data-quality outcomes on synthetic input, not strategy returns.
+## Verification
 
-No private market data, user/account records, credentials, deployment identity or private Git history are included. The complete private project's visibility and private website are unchanged.
+Five Python regression tests and complete notebook execution pass locally. The suite covers row conservation, hard constraints, unique keys, gap/anomaly gating, future-prefix invariance, and matplotlib export. The static-public check verifies service separation, script syntax, and UI bindings. GitHub Actions runs these checks and verifies the built demo matches the committed source.
 
 ## Hosting
 
-GitHub Pages publishes the static `docs/` directory from `main`. Python and scientific packages load from the Pyodide CDN on the visitor's computer; initial loading requires internet and can take tens of seconds. After installation, the downloaded research files run locally without network access.
+GitHub Pages publishes `main/docs`. Pyodide executes Python locally in the visitor's browser. First use requires network access to download the runtime and packages. Downloaded research files run offline after dependency installation.

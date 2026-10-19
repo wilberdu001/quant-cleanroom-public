@@ -8,9 +8,18 @@
 
 ### [Open the live demo](https://wilberdu001.github.io/quant-cleanroom-public/) · [Explore the notebook](research.ipynb) · [Read the cleaning engine](cleaning.py)
 
+[Methodology](#cleaning-methodology) · [Architecture](#architecture-one-implementation-two-execution-paths) · [Test evidence](#test-evidence) · [Local setup](#run-the-research-locally)
+
 Turn contaminated one-minute OHLCV records into a traceable research dataset. Inspect the input, the exact Python code, intermediate snapshots, quarantine reasons, and the effect of each decision on downstream features.
 
 This is a reproducible research-engineering showcase using **clearly labeled synthetic data**. It does not report trading performance or claim that a cleaned signal is profitable.
+
+<details>
+<summary>Preview the English research workbench</summary>
+
+![English Python workbench with data-quality metrics and an auditable cleaning pipeline](docs/assets/demo.jpg)
+
+</details>
 
 ## What you can explore
 
@@ -99,3 +108,53 @@ Open [the local preview](http://127.0.0.1:4174/quant-cleanroom-public/). GitHub 
 This public repository contains generic cleaning methods, synthetic fixtures, educational notebooks, and a static demo. It excludes production snapshots, account records, credentials, scheduled collectors, private deployment identifiers, and private Git history. See [the public-release boundary](PUBLIC-BOUNDARY.md).
 
 Equity trading calendars, corporate actions, versioned adjustments, fundamental publication times, survivorship bias, liquidity constraints, latency, spreads, slippage, and fees need separate modeling before these ideas become a realistic backtest.
+
+## Architecture: one implementation, two execution paths
+
+```mermaid
+flowchart LR
+    S[Seeded synthetic bars / local CSV] --> W[Pyodide in the browser]
+    W --> C[cleaning.py / pandas]
+    C --> A[Stage snapshots and quarantine evidence]
+    C --> P[matplotlib diagnostics]
+    S --> E[Self-contained notebook and script exports]
+    E --> L[Local Python / Jupyter / VS Code]
+    L --> C
+```
+
+| Component | Responsibility |
+| --- | --- |
+| [`cleaning.py`](cleaning.py) | The shared schema, validation, gap, anomaly, feature, and plotting implementation. |
+| [`web/ui.html`](web/ui.html) | Stage explanations, controls, metrics, audit tables, and browser-local CSV parsing. |
+| [`web/research.js`](web/research.js) | Pyodide initialization, shared-code execution, and self-contained research-file generation. |
+| [`web/simulate.js`](web/simulate.js) | Deterministic synthetic OHLCV and controlled contamination; it does not perform cleaning. |
+| [`scripts/build-demo.mjs`](scripts/build-demo.mjs) | Embed the Python implementation and browser sources into the static `docs/index.html` artifact. |
+| [`scripts/export-sample.mjs`](scripts/export-sample.mjs) | Rebuild the committed notebook, VS Code script, and fixed-seed dataset from the shared sources. |
+| [`tests/`](tests) | Research invariants, causal-prefix checks, plotting, and executable notebook verification. |
+
+There is no application server, database, broker connection, or collection job in the public demo. GitHub Pages only serves static files. The downloadable research files include the selected data and the same Python source, making the experiment independent of the website after installation.
+
+## Test evidence
+
+[View the latest CI run](https://github.com/wilberdu001/quant-cleanroom-public/actions/workflows/checks.yml).
+
+| Verification | What it checks | Result |
+| --- | --- | --- |
+| Five Python regression tests | Row conservation; unique valid output; anomaly/gap gates; future-prefix invariance; quarantine of invalid inputs; matplotlib PNG output. | Passed locally and included in CI. |
+| Notebook execution | Run the notebook in an isolated kernel, skip the already-satisfied installation cell, and verify CSV and figure outputs. | Passed locally and included in CI. |
+| Public static artifact | Script syntax, literal DOM bindings, synthetic labeling, and absence of private routes, credentials, and deployment identity. | Passed locally and included in CI. |
+| Numerical compatibility | Compare every stage's counts, row IDs, numeric fields, anomaly scores, and readiness flags with the previous public implementation. | Unchanged for the reference experiment. |
+| English-only release | Inspect tracked text and decoded notebook/JSON content, plus English HTML language metadata. | Enforced in CI. |
+
+Run the checks with the virtual environment selected above:
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m unittest discover -s tests -v
+python tests/execute_notebook.py
+node scripts/build-demo.mjs
+node scripts/check-public.mjs
+node scripts/check-english.mjs
+```
+
+The tests establish implementation and data-quality invariants. They do not establish predictive performance, realistic fills, or production readiness.

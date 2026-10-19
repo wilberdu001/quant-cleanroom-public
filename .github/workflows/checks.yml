@@ -16,6 +16,7 @@ jobs:
       - run: python -m pip install -r requirements-dev.txt
       - run: node scripts/build-demo.mjs
       - run: node scripts/check-public.mjs
+      - run: node scripts/check-english.mjs
       - run: python -m unittest discover -s tests -v
       - run: python tests/execute_notebook.py
       - name: Ensure published static demo matches source

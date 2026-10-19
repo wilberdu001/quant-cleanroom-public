@@ -1,11 +1,21 @@
-# 公开版本内容与研究边界
+# Public release boundary
 
-本项目是独立整理的公开教学与工程展示版本，采用新的 Git 历史。它保留通用的 OHLCV 清洗、记录级审计、因果特征检查和同源 Notebook 导出。
+This repository is an independently curated research-engineering showcase with its own Git history. It includes reviewed generic OHLCV cleaning methods, deterministic synthetic fixtures, educational notebooks, and a static, client-side demonstration.
 
-公开输入仅包含可复现合成分钟数据。demo 可在浏览器内处理访客自己选择的 CSV，但没有任何上传接口；文件不发送到项目服务器。实验日志仅保存在访客浏览器的独立本地存储中。CDN 只负责提供 Python、pandas、matplotlib 及字体资源，不接收输入行情。
+## Data and execution
 
-未公开：生产市场池或历史快照、自动采集/写入接口、用户或账户记录、密钥、备份、站点身份及私有仓库 Git 历史。完整版本的访问权限保持不变。
+The committed input contains synthetic one-minute bars only. Visitors may choose a local CSV, but the demo has no upload endpoint: input and calculations remain in browser memory. Experiment logs use a separate local-storage namespace on the visitor's device. CDNs provide the Python runtime, scientific packages, and fonts; the application does not send its input records to those providers.
 
-研究假设：单标的、连续交易市场、UTC 1 分钟 K 线。只检查输入窗口内部缺口。当前收益不参与自身异常基准及风险估计。异常只标记；价格不被截断或猜测填补。数据门槛通过并不证明信号有效或可以按收盘价成交。
+## Excluded material
 
-回测还需要交易日历、版本化复权、样本外验证、流动性、延迟、点差、费用与真实成交约束。此公开演示不报告任何策略 alpha 或实盘表现。
+Production market pools and snapshots, scheduled collection and write endpoints, user/account records, credentials, backups, deployment identifiers, and the private project's Git history are excluded. The complete version retains its existing access controls.
+
+## Research assumptions
+
+The example assumes one instrument in a continuously traded, one-minute market. Gaps are measured only within the supplied window. The current observation does not participate in its own anomaly reference or historical risk estimate. Unusual prices are flagged without being clipped, repaired, or declared invalid solely by a statistical test.
+
+The `tradable` field is a data-readiness gate, not a statement about liquidity, executable prices, prediction quality, or profitability. Equity calendars, versioned corporate-action adjustments, publication-time joins, survivorship bias, out-of-sample evaluation, latency, spreads, slippage, and fees require additional modeling.
+
+## Language and maintenance
+
+Public documentation, UI text, code comments, notebook explanations, sample provenance, screenshots, and release notes use English. Automated checks reject CJK text in tracked textual deliverables and confirm the public demo remains disconnected from private service routes. User-supplied local data is not translated or published.
