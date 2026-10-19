@@ -1,0 +1,15 @@
+import {readFile,writeFile,mkdir} from 'node:fs/promises';
+import {fileURLToPath} from 'node:url';
+import vm from 'node:vm';
+const root=new URL('../',import.meta.url);
+const [ui,engine,python,research]=await Promise.all(['web/ui.html','web/simulate.js','cleaning.py','web/research.js'].map(name=>readFile(new URL(name,root),'utf8')));
+const bridge=research.replace('/* PYTHON_SOURCE_PLACEHOLDER */',JSON.stringify(python));
+const html=ui.replace('/* ENGINE_PLACEHOLDER */',engine).replace('/* RESEARCH_PLACEHOLDER */',bridge.replaceAll('</script','<\\/script'));
+const code=html.match(/<script>([\s\S]*)<\/script>/)?.[1];
+if(!code)throw new Error('Missing demo script');
+new vm.Script(code);
+if(/\/api\/|OAI-Sites-Authorization|appgprj_|chatgpt\.site|[A-Z]:\\Users\\/i.test(html))throw new Error('Private service or local identity in demo');
+await mkdir(new URL('docs/',root),{recursive:true});
+await writeFile(new URL('docs/index.html',root),html);
+await writeFile(new URL('docs/.nojekyll',root),'');
+console.log('Built public static demo: '+fileURLToPath(new URL('docs/index.html',root)));

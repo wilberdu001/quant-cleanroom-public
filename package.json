@@ -1,0 +1,10 @@
+{
+  "name": "quant-cleanroom-public",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-demo.mjs",
+    "preview": "node scripts/preview.mjs"
+  }
+}

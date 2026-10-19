@@ -4,6 +4,27 @@ Auditable OHLCV data cleaning with **Python, pandas and matplotlib**. 每一步�
 
 Repository: https://github.com/wilberdu001/quant-cleanroom-public
 
+**[打开交互式公开 Demo](https://wilberdu001.github.io/quant-cleanroom-public/)**
+
+## 交互体验
+
+- 浏览器通过 Pyodide 执行真实的 Python / pandas 清洗，不以 JavaScript 仿真冒充 Python 结果。
+- 六步代码快照、中文注释与研究含义、记录级原始/步骤/最终/隔离表格。
+- matplotlib 价格质量图和就绪样本收益分布；缺口和异常处断开有效价格轨迹。
+- 任意刷新合成样本；以种子、标的、污染强度重建输入。
+- 本地 CSV 在浏览器内处理；可下载当前数据的 Notebook、VS Code 脚本或完整 ZIP。
+
+首次打开需联网下载 Python、pandas、matplotlib，可能需要等待几十秒；加载状态会显示进度。下载文件可在本机安装依赖后离线运行。演示没有服务端采集或任何交易执行能力。
+
+本地预览需要 Node.js 18+：
+
+```bash
+node scripts/build-demo.mjs
+node scripts/preview.mjs
+```
+
+打开 http://127.0.0.1:4174/quant-cleanroom-public/ 。GitHub Pages 仅从 `main` 分支的 `docs/` 发布静态文件。
+
 ## 研究目标
 
 用可复现的人工污染样本，展示量化研究的数据准备方法，而不是声称策略收益或实时交易能力：
