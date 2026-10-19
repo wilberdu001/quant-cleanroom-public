@@ -1,99 +1,101 @@
-# Quant Cleanroom · 公开量化研究实验室
+# Quant Cleanroom
 
-Auditable OHLCV data cleaning with **Python, pandas and matplotlib**. 每一步展示中文解释、实际执行代码与记录级审计结果。
+**Auditable market-data cleaning for quantitative research, built with Python, pandas, and matplotlib.**
 
-Repository: https://github.com/wilberdu001/quant-cleanroom-public
+[![Research checks](https://github.com/wilberdu001/quant-cleanroom-public/actions/workflows/checks.yml/badge.svg)](https://github.com/wilberdu001/quant-cleanroom-public/actions/workflows/checks.yml)
+[![Python 3.11+](https://img.shields.io/badge/Python-3.11%2B-3776AB)](requirements.txt)
+[![Data: synthetic](https://img.shields.io/badge/Data-synthetic-087d66)](dataset.json)
 
-**[打开交互式公开 Demo](https://wilberdu001.github.io/quant-cleanroom-public/)**
+### [Open the live demo](https://wilberdu001.github.io/quant-cleanroom-public/) · [Explore the notebook](research.ipynb) · [Read the cleaning engine](cleaning.py)
 
-![记录级审计：实际执行的 pandas 代码、质量门槛与隔离原因](docs/assets/demo.jpg)
+Turn contaminated one-minute OHLCV records into a traceable research dataset. Inspect the input, the exact Python code, intermediate snapshots, quarantine reasons, and the effect of each decision on downstream features.
 
-## 交互体验
+This is a reproducible research-engineering showcase using **clearly labeled synthetic data**. It does not report trading performance or claim that a cleaned signal is profitable.
 
-- 浏览器通过 Pyodide 执行真实的 Python / pandas 清洗，不以 JavaScript 仿真冒充 Python 结果。
-- 六步代码快照、中文注释与研究含义、记录级原始/步骤/最终/隔离表格。
-- matplotlib 价格质量图和就绪样本收益分布；缺口和异常处断开有效价格轨迹。
-- 任意刷新合成样本；以种子、标的、污染强度重建输入。
-- 本地 CSV 在浏览器内处理；可下载当前数据的 Notebook、VS Code 脚本或完整 ZIP。
+## What you can explore
 
-首次打开需联网下载 Python、pandas、matplotlib，可能需要等待几十秒；加载状态会显示进度。下载文件可在本机安装依赖后离线运行。演示没有服务端采集或任何交易执行能力。
+- **Real Python in the browser.** Pyodide executes the same pandas functions used by the downloadable notebook and VS Code script.
+- **Record-level auditability.** Switch between raw input, the current stage, final output, and quarantined rows; retain original row IDs and failure reasons.
+- **Controlled data defects.** Vary the seed, instrument, and contamination level to reproduce duplicates, missing values, timestamp-unit errors, invalid OHLCV, missing bars, and price spikes.
+- **Matplotlib diagnostics.** Compare raw and accepted prices, break the displayed line at gaps or flagged observations, and inspect the return distribution of data-ready rows.
+- **Portable experiments.** Download the selected input, parameters, annotated Python, Jupyter Notebook, VS Code script, or a complete research ZIP.
+- **Local CSV processing.** Imported files are processed in browser memory, without a project backend or upload endpoint.
 
-本地预览需要 Node.js 18+：
+First use downloads the Python runtime and scientific packages from a CDN and can take tens of seconds. Progress and errors are visible. Downloaded research files run offline after their dependencies are installed.
+
+## Cleaning methodology
+
+The pipeline targets a **single instrument in a continuously traded, one-minute market**. `timestamp` is the bar's opening time; `asOf` is the observation cutoff in UTC milliseconds.
+
+| Stage | Implementation | Research rationale |
+| --- | --- | --- |
+| 1. Normalize schema | Parse numeric fields, normalize seconds/milliseconds and timezone-aware dates, standardize symbols, preserve missing values. | Blank prices must not silently become zero; mixed time units must not corrupt ordering. |
+| 2. Enforce availability and deduplicate | Exclude unfinished bars using `timestamp + 60s <= asOf`; retain the first received `(symbol, timestamp)` before sorting. | Avoid unstable, unfinished inputs and silent replacement by a later duplicate. Full point-in-time reconstruction still requires arrival timestamps and revision history. |
+| 3. Validate OHLCV | Require minute alignment, finite values, positive prices, nonnegative volume, and consistent high/low bounds; quarantine failures. | Preserve evidence of upstream defects rather than guessing a repair. |
+| 4. Detect missing bars | Identify internal timestamp discontinuities; retain explicit gap counts without filling prices or volume. | Forward-filled bars can manufacture zero returns and apparent liquidity. No inference is made outside the input window. |
+| 5. Flag unusual returns | Compute log returns only across adjacent minutes. Score against the previous 20-60 available returns using median/MAD; retain the price unchanged. | Keep the current and future observation out of its own reference distribution. A flagged move may be genuine and needs independent verification. |
+| 6. Build causal features | Use the previous minute's return and the sample standard deviation of 20 prior consecutive valid returns. Reset the risk window after gaps or anomalies. | Make information availability explicit and prevent contaminated or discontinuous histories from quietly entering risk estimates. |
+
+**Important distinction:** `tradable` is the existing field name for a data-readiness gate. It is not an execution guarantee, an order instruction, or evidence of alpha. Signals formed at a close require a later executable observation in a backtest.
+
+### Reproducible reference experiment
+
+The committed sample uses seed **72641**, contamination **0.55**, and a synthetic 240-minute window. Skipped and duplicated bars mean the input row count is not necessarily 240.
+
+| Outcome | Reference result |
+| --- | ---: |
+| Raw records | 241 |
+| Quarantined records | 17 |
+| Accepted records | 224 |
+| Missing minutes inside the window | 16 |
+| Flagged return observations | 4 |
+| Data-ready observations | 16 |
+
+These are data-quality outcomes on one seeded sample, not investment returns. Changing the threshold or the input can change the results.
+
+## Run the research locally
+
+Python **3.11+** is required. The notebook and script embed the sample and parameters, so no API key, account, or live-data connection is needed.
+
+**Windows / PowerShell**
+
+```powershell
+git clone https://github.com/wilberdu001/quant-cleanroom-public.git
+cd quant-cleanroom-public
+python -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe research.py
+.\.venv\Scripts\python.exe -m jupyterlab research.ipynb
+```
+
+**macOS / Linux**
+
+```bash
+git clone https://github.com/wilberdu001/quant-cleanroom-public.git
+cd quant-cleanroom-public
+python3 -m venv .venv
+.venv/bin/python -m pip install -r requirements.txt
+.venv/bin/python research.py
+.venv/bin/python -m jupyterlab research.ipynb
+```
+
+In VS Code, select the same virtual environment. Open `research.ipynb` and choose **Run All**, or use the `# %%` cells in `research.py`. If dependencies are already installed, skip the notebook's installation cell.
+
+The script writes `cleaned.csv`, `quarantine.csv`, `stages.json`, and `quality_audit.png` to `results/` beside the script. The notebook writes its results relative to its working directory.
+
+## Run the web demo locally
+
+Node.js **18+** is sufficient; no npm packages are required.
 
 ```bash
 node scripts/build-demo.mjs
 node scripts/preview.mjs
 ```
 
-打开 http://127.0.0.1:4174/quant-cleanroom-public/ 。GitHub Pages 仅从 `main` 分支的 `docs/` 发布静态文件。
+Open [the local preview](http://127.0.0.1:4174/quant-cleanroom-public/). GitHub Pages serves the same static `docs/` directory from `main`.
 
-## 研究目标
+## Scope and limitations
 
-用可复现的人工污染样本，展示量化研究的数据准备方法，而不是声称策略收益或实时交易能力：
+This public repository contains generic cleaning methods, synthetic fixtures, educational notebooks, and a static demo. It excludes production snapshots, account records, credentials, scheduled collectors, private deployment identifiers, and private Git history. See [the public-release boundary](PUBLIC-BOUNDARY.md).
 
-1. 统一数值类型与 UTC 时间戳，保留缺失语义。
-2. 以采集截止时刻过滤未收盘 K 线，并按主键去重。
-3. 隔离违反 OHLCV 硬约束的记录。
-4. 显式标记分钟缺口，不前向填充可交易价格。
-5. 只用历史收益校准 rolling median/MAD 异常检测。
-6. 构造滞后收益和连续历史风险窗口，报告研究数据门槛。
-
-## 在 Jupyter / VS Code 中运行
-
-Python 3.11+：
-
-```bash
-python -m venv .venv
-# Windows: .venv\Scripts\python -m pip install -r requirements.txt
-# macOS/Linux: .venv/bin/python -m pip install -r requirements.txt
-python -m pip install -r requirements.txt
-python research.py
-python -m jupyterlab research.ipynb
-```
-
-上述最后三条命令应使用选定虚拟环境的 Python。VS Code 选择相同环境；`research.py` 支持 `# %%` 单元格，Notebook 可按顺序 Run All。
-
-`dataset.json` 是固定种子 72641 的 240 分钟合成 OHLCV 样本，人工注入重复、空值、负成交量、时间单位混用、OHLC 冲突和尖峰。`research.ipynb` 与 `research.py` 内嵌同一快照及参数；安装依赖后无需联网即可运行。`results/` 由脚本生成，包含清洗 CSV、隔离 CSV、完整快照与 matplotlib 图表。
-
-## 方法边界
-
-`tradable` 只表示演示的数据质量门槛通过，不代表可以买卖或具有预测能力。异常只能标记待核验，不能单凭一个来源断言是错误报价。股票日历、企业行动、基本面 point-in-time 数据、成交延迟、点差与交易费用均不在此通用分钟清洗演示范围内。
-
-本仓库不包含生产数据、用户记录、密钥、自动采集服务或私有部署配置。
-
-## 实现结构
-
-```mermaid
-flowchart LR
-  A[合成样本 / 本地 CSV] --> B[浏览器 Pyodide]
-  B --> C[cleaning.py / pandas]
-  C --> D[六步独立快照 + 隔离表]
-  C --> E[matplotlib 图表]
-  C --> F[同源 Notebook / VS Code 导出]
-```
-
-`cleaning.py` 是共享的研究实现，`web/research.js` 嵌入它并生成自包含研究文件；`scripts/build-demo.mjs` 将页面和代码装配成 `docs/index.html`。GitHub Pages 只提供静态文件，不运行服务器端数据采集或交易。
-
-## 验证
-
-```bash
-python -m pip install -r requirements-dev.txt
-python -m unittest discover -s tests -v
-python tests/execute_notebook.py
-node scripts/build-demo.mjs
-node scripts/check-public.mjs
-```
-
-检查覆盖：输入行守恒、主键唯一和 OHLCV 约束、缺口与异常质量门槛、增加未来记录不改变过去特征、matplotlib 图片导出、Notebook 实际运行，以及公开内容与网页控件绑定检查。默认种子样本产生 241 条输入、17 条隔离记录、16 个缺失分钟和 16 条数据就绪记录。GitHub Actions 的测试与 Pages 构建均已通过。
-
-## 公开展示与完整版的区别
-
-| 能力 | 此公开展示 | 独立私有完整版 |
-| --- | --- | --- |
-| Python/pandas 清洗、中文解释和审计 | 支持 | 支持 |
-| 合成数据池、随机种子、污染实验 | 支持 | 支持 |
-| 浏览器本地 CSV 和研究文件导出 | 支持 | 支持 |
-| 生产市场池、定时采集和持久批次 | 不包含 | 保留 |
-| 私人数据、部署配置与访问控制 | 不公开 | 保留原权限 |
-
-公开版拥有独立 Git 历史；按研究核心、交互 demo、验证流程、展示文档四个实际里程碑分别提交推送。详细边界见 [PUBLIC-BOUNDARY.md](PUBLIC-BOUNDARY.md)。
+Equity trading calendars, corporate actions, versioned adjustments, fundamental publication times, survivorship bias, liquidity constraints, latency, spreads, slippage, and fees need separate modeling before these ideas become a realistic backtest.
