@@ -16,9 +16,9 @@ for(const name of files){
 }
 const html=await fs.readFile(path.join(root,'docs/index.html'),'utf8');
 assert(!/\/api\/|OAI-Sites-Authorization|KRAKEN|data-pool="market"/.test(html),'Private market connection in demo');
-assert(html.includes('PUBLIC DEMO')&&html.includes('合成数据'));
+assert(html.includes('PUBLIC DEMO')&&html.includes('Synthetic data'));
 const code=html.match(/<script>([\s\S]*)<\/script>/)[1];new vm.Script(code);
-// 静态页面绑定的每个字面量 ID 均必须存在；避免裁剪市场功能后出现空控件异常。
+// Every literal element ID referenced by the static demo must exist.
 const ids=new Set([...html.matchAll(/\bid="([^"]+)"/g)].map(m=>m[1]));
 for(const [,id] of code.matchAll(/\$\('([^']+)'\)/g))assert(ids.has(id),'Missing element: '+id);
 assert(!html.includes('/* PYTHON_SOURCE_PLACEHOLDER */'));

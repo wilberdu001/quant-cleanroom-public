@@ -209,7 +209,7 @@
       "close": "75201.89",
       "volume": "109.7684",
       "closed": true,
-      "injected": "价格尖峰（练习注入）"
+      "injected": "Injected price spike (synthetic exercise)"
     },
     {
       "id": 20,
@@ -760,7 +760,7 @@
       "close": "74959.31",
       "volume": "111.0687",
       "closed": true,
-      "injected": "价格尖峰（练习注入）"
+      "injected": "Injected price spike (synthetic exercise)"
     },
     {
       "id": 70,
@@ -2345,7 +2345,7 @@
       "close": "75901.58",
       "volume": "46.4489",
       "closed": true,
-      "injected": "价格尖峰（练习注入）"
+      "injected": "Injected price spike (synthetic exercise)"
     },
     {
       "id": 214,
@@ -2656,7 +2656,7 @@
       "closed": true
     }
   ],
-  "source": "合成 OHLCV · 固定历史时窗 · 人工注入污染",
+  "source": "Synthetic OHLCV / fixed historical window / injected contamination",
   "asOf": 1791820800000,
   "createdAt": "2026-10-12T16:00:00.000Z",
   "seed": 72641,

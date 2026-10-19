@@ -1,4 +1,4 @@
-"""在隔离临时目录实际执行公开 Notebook；测试中跳过已安装依赖的安装格。"""
+"""Execute the public notebook in an isolated temporary directory; skip its installation cell."""
 import os
 import subprocess
 import sys

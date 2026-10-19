@@ -11,12 +11,12 @@ function simulate(seed, intensity=0.55, symbol='BTCUSDT') {
     if(p<intensity*.075) r.close='';
     else if(p<intensity*.105) r.volume='-12';
     else if(p<intensity*.135) r.high=(open*.5).toFixed(2);
-    else if(p<intensity*.17) {r.close=(close*1.12).toFixed(2);r.high=(close*1.13).toFixed(2);r.injected='价格尖峰（练习注入）';}
+    else if(p<intensity*.17) {r.close=(close*1.12).toFixed(2);r.high=(close*1.13).toFixed(2);r.injected='Injected price spike (synthetic exercise)';}
     if(random()<intensity*.08) r.timestamp=Math.floor(r.timestamp/1000);
     rows.push(r);
     if(random()<intensity*.06) rows.push({...r,id:1000+i});
   }
   // Shuffle a few rows to model delayed packet arrival; duplicate policy remains arrival-based.
   for(let i=0;i<10;i++){const a=Math.floor(random()*rows.length),b=Math.floor(random()*rows.length);[rows[a],rows[b]]=[rows[b],rows[a]];}
-  return {id:'sim-'+seed,rows,source:'合成 OHLCV · 固定历史时窗 · 人工注入污染',asOf:end,createdAt:new Date().toISOString(),seed,synthetic:true,symbol};
+  return {id:'sim-'+seed,rows,source:'Synthetic OHLCV / fixed historical window / injected contamination',asOf:end,createdAt:new Date().toISOString(),seed,synthetic:true,symbol};
 }

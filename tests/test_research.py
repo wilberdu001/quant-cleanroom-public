@@ -1,4 +1,4 @@
-"""公开合成研究的质量、因果性和图表回归测试。"""
+"""Quality, causality, and plotting regression tests for the public synthetic study."""
 import io
 import json
 import sys
@@ -34,7 +34,7 @@ class ResearchChecks(unittest.TestCase):
         self.assertTrue(frame['volume'].ge(0).all())
         gaps = frame['gapMinutes'].gt(0)
         self.assertTrue(frame.loc[gaps, 'ret'].isna().all())
-        bad = frame['flags'].map(lambda f: '异常收益' in f)
+        bad = frame['flags'].map(lambda f: 'Unusual return' in f)
         self.assertFalse(frame.loc[bad | gaps, 'tradable'].any())
 
     def test_future_data_cannot_change_past_features(self):
