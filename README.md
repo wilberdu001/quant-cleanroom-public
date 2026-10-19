@@ -6,6 +6,8 @@ Repository: https://github.com/wilberdu001/quant-cleanroom-public
 
 **[打开交互式公开 Demo](https://wilberdu001.github.io/quant-cleanroom-public/)**
 
+![记录级审计：实际执行的 pandas 代码、质量门槛与隔离原因](docs/assets/demo.jpg)
+
 ## 交互体验
 
 - 浏览器通过 Pyodide 执行真实的 Python / pandas 清洗，不以 JavaScript 仿真冒充 Python 结果。
@@ -58,3 +60,40 @@ python -m jupyterlab research.ipynb
 `tradable` 只表示演示的数据质量门槛通过，不代表可以买卖或具有预测能力。异常只能标记待核验，不能单凭一个来源断言是错误报价。股票日历、企业行动、基本面 point-in-time 数据、成交延迟、点差与交易费用均不在此通用分钟清洗演示范围内。
 
 本仓库不包含生产数据、用户记录、密钥、自动采集服务或私有部署配置。
+
+## 实现结构
+
+```mermaid
+flowchart LR
+  A[合成样本 / 本地 CSV] --> B[浏览器 Pyodide]
+  B --> C[cleaning.py / pandas]
+  C --> D[六步独立快照 + 隔离表]
+  C --> E[matplotlib 图表]
+  C --> F[同源 Notebook / VS Code 导出]
+```
+
+`cleaning.py` 是共享的研究实现，`web/research.js` 嵌入它并生成自包含研究文件；`scripts/build-demo.mjs` 将页面和代码装配成 `docs/index.html`。GitHub Pages 只提供静态文件，不运行服务器端数据采集或交易。
+
+## 验证
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m unittest discover -s tests -v
+python tests/execute_notebook.py
+node scripts/build-demo.mjs
+node scripts/check-public.mjs
+```
+
+检查覆盖：输入行守恒、主键唯一和 OHLCV 约束、缺口与异常质量门槛、增加未来记录不改变过去特征、matplotlib 图片导出、Notebook 实际运行，以及公开内容与网页控件绑定检查。默认种子样本产生 241 条输入、17 条隔离记录、16 个缺失分钟和 16 条数据就绪记录。GitHub Actions 的测试与 Pages 构建均已通过。
+
+## 公开展示与完整版的区别
+
+| 能力 | 此公开展示 | 独立私有完整版 |
+| --- | --- | --- |
+| Python/pandas 清洗、中文解释和审计 | 支持 | 支持 |
+| 合成数据池、随机种子、污染实验 | 支持 | 支持 |
+| 浏览器本地 CSV 和研究文件导出 | 支持 | 支持 |
+| 生产市场池、定时采集和持久批次 | 不包含 | 保留 |
+| 私人数据、部署配置与访问控制 | 不公开 | 保留原权限 |
+
+公开版拥有独立 Git 历史；按研究核心、交互 demo、验证流程、展示文档四个实际里程碑分别提交推送。详细边界见 [PUBLIC-BOUNDARY.md](PUBLIC-BOUNDARY.md)。
