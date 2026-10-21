@@ -1,0 +1,13 @@
+import fs from 'node:fs/promises';
+import vm from 'node:vm';
+import assert from 'node:assert/strict';
+const root=new URL('../',import.meta.url);
+const [python,bridge,engine,ui]=await Promise.all(['cleaning.py','web/research.js','web/simulate.js','web/ui.html'].map(p=>fs.readFile(new URL(p,root),'utf8')));
+const stepCode=ui.slice(ui.indexOf('const steps='),ui.indexOf('let currentPool='));
+const context={TextEncoder,Blob};vm.createContext(context);
+vm.runInContext(engine+'\n'+stepCode+'\n'+bridge.replace('/* PYTHON_SOURCE_PLACEHOLDER */',JSON.stringify(python))+'\nconst sample=simulate(72641,.55,"BTCUSDT"); files=researchFiles(sample,{asOf:sample.asOf,threshold:8});',context);
+assert(context.files['requirements.txt'].split('\n').includes('pillow>=13.0.0,<14'));
+const notebook=JSON.parse(context.files['research.ipynb']);
+const installer=notebook.cells.find(c=>c.cell_type==='code'&&String(c.source).includes('%pip install'));
+assert(installer&&String(installer.source).includes('"pillow>=13.0.0,<14"'));
+console.log('PASS: freshly generated research ZIP requirements and notebook installer enforce the Pillow security floor.');

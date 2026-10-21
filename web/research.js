@@ -1,7 +1,7 @@
 // Downloads are self-contained and use the same cleaning.py implementation as the browser.
 const PYTHON_SOURCE = /* PYTHON_SOURCE_PLACEHOLDER */;
 const pythonSteps = PYTHON_SOURCE.split(/# STEP \d\n/).slice(1).map(s=>s.split(/# (?:STEP|PIPELINE)/)[0].trim());
-const requirements = 'numpy>=1.26,<3\npandas>=2.2,<4\nmatplotlib>=3.8,<4\njupyterlab>=4,<5\nipykernel>=6,<8\n';
+const requirements = 'numpy>=1.26,<3\npandas>=2.2,<4\nmatplotlib>=3.8,<4\npillow>=13.0.0,<14\njupyterlab>=4,<5\nipykernel>=6,<8\n';
 let pythonPromise = null, pythonRuntime = null, computeVersion = 0, matplotlibSVG = '';
 async function ensurePython() {
   if (!pythonPromise) pythonPromise=(async()=>{
@@ -43,7 +43,7 @@ function notebookDocument(data, params) {
   const sections = PYTHON_SOURCE.split(/(?=# STEP \d\n|# PIPELINE\n|# PLOT\n)/);
   const cells = [
     md('# Quant Cleanroom: reproducible OHLCV research\n\nPython / pandas / matplotlib. Execute cells in order to inspect every intermediate snapshot and quarantine decision.\n\nThis notebook embeds the selected input and its as-of cutoff, instrument, seed, and source metadata. No live feed, API key, or website account is required.'),
-    code('# Install dependencies in this notebook kernel. Skip this cell if they are already installed.\n%pip install "numpy>=1.26,<3" "pandas>=2.2,<4" "matplotlib>=3.8,<4"'),
+    code('# Install dependencies in this notebook kernel. Skip this cell if they are already installed.\n%pip install "numpy>=1.26,<3" "pandas>=2.2,<4" "matplotlib>=3.8,<4" "pillow>=13.0.0,<14"'),
     code(sections[0]),
     code('# Embed raw input as JSON so Python and JavaScript null/boolean syntax cannot diverge.\ndataset = json.loads(' + JSON.stringify(JSON.stringify(data)) + ')\noptions = json.loads(' + JSON.stringify(JSON.stringify(params)) + ')\nraw = dataset["rows"]\npd.DataFrame(raw).head(10)')
   ];
